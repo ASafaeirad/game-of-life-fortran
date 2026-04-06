@@ -50,18 +50,75 @@ program game_of_life
    integer(rk) :: c
    character(len=2) :: cell
 
-   integer(rk) :: arg_size
-   character(len=32) :: arg
+   integer(rk) :: arg_count, arg_index
+   real:: arg_speed
+   integer(rk) :: speed = 100000
+   character(len=256) :: arg
+   character(len=256) :: input_path = "input"
    integer(rk) :: unit = 10, ios
    character(len=256) :: line
 
-   arg_size = command_argument_count()
-   if (arg_size >= 1) then
-      call get_command_argument(1, arg)
-      read(arg, *) generations
+   file_grid = 0
+
+   arg_count = command_argument_count()
+   arg_index = 1
+   do while (arg_index <= arg_count)
+      call get_command_argument(arg_index, arg)
+
+      select case (trim(arg))
+       case ('-g')
+         if (arg_index >= arg_count) then
+            print '(A)', 'Missing value for -g'
+            stop 1
+         end if
+
+         arg_index = arg_index + 1
+         call get_command_argument(arg_index, arg)
+         read(arg, *, iostat=ios) generations
+         if (ios /= 0) then
+            print '(A)', 'Invalid value for -g'
+            stop 1
+         end if
+       case ('-f')
+         if (arg_index >= arg_count) then
+            print '(A)', 'Missing value for -f'
+            stop 1
+         end if
+
+         arg_index = arg_index + 1
+         call get_command_argument(arg_index, input_path)
+       case ('-s')
+         if (arg_index >= arg_count) then
+            print '(A)', 'Missing value for -s'
+            stop 1
+         end if
+         arg_index = arg_index + 1
+         call get_command_argument(arg_index, arg)
+         read(arg, *, iostat=ios) arg_speed
+         if (ios /= 0) then
+            print '(A)', 'Invalid value for -s'
+            stop 1
+         end if
+         if (arg_speed <= 0.0) then
+            print '(A)', 'Value for -s must be greater than 0'
+            stop 1
+         end if
+         speed = int(real(speed, kind=kind(arg_speed)) / arg_speed, kind=rk)
+
+       case default
+         print '(2A)', 'Unknown argument: ', trim(arg)
+         stop 1
+      end select
+
+      arg_index = arg_index + 1
+   end do
+
+   open(unit, file=trim(input_path), status='old', action='read', iostat=ios)
+   if (ios /= 0) then
+      print '(2A)', 'Unable to open input file: ', trim(input_path)
+      stop 1
    end if
 
-   open(unit, file='build/input', status='old', action='read')
    do
       read(unit, '(A)', iostat=ios) line
       if (ios /= 0) then
@@ -117,7 +174,7 @@ program game_of_life
             end if
          end do
       end do
-      call usleep(100000)
+      call usleep(speed)
       call clear_screen()
       print '(A,I3)', "Generation: ", generation
       call print_grid(alternate, rows, cols)

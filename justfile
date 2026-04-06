@@ -12,7 +12,7 @@ build:
 [default]
 run:
   just build
-  ./{{target}}
+  ./{{target}} -g 50 -f build/input -s 2.5
 
 watch:
   just build
