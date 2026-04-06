@@ -1,7 +1,7 @@
-program game_of_life
+program main
    use kinds_mod
-   use grid_mod
-   use terminal_mod
+   use game_of_life
+
    implicit none
 
    interface usleep
@@ -13,23 +13,16 @@ program game_of_life
 
    integer(rk) :: rows = 1, cols = 1
    integer(rk) :: file_grid(100, 100)
-   integer(rk), allocatable :: grid(:, :)
-   integer(rk), allocatable :: alternate(:, :)
-   integer(rk), allocatable :: neighbors(:, :)
 
-   integer(rk) :: living_neighbors = 0
-   integer(rk) :: row, col
-   integer(rk) :: start_row, end_row, start_col, end_col
-   integer(rk) :: neighbor_rows, neighbor_cols
    integer(rk) :: generation, generations = 10
    integer(rk) :: c
    character(len=2) :: cell
 
    integer(rk) :: arg_count, arg_index
-   real:: arg_speed
+   real :: arg_speed
    integer(rk) :: speed = 100000
    character(len=256) :: arg
-   character(len=256) :: input_path = "input"
+   character(len=256) :: input_path = 'input'
    integer(rk) :: unit = 10, ios
    character(len=256) :: line
 
@@ -115,44 +108,11 @@ program game_of_life
    end do
    close(unit)
 
-   allocate(grid(rows, cols))
-   allocate(alternate(rows, cols))
-   grid = file_grid(1:rows, 1:cols)
-   alternate = grid
-
-   call clear_screen()
-   call print_grid(grid, rows, cols)
-
+   call initialize_game_state(file_grid, rows, cols)
+   call render()
    do generation = 1, generations
-      do row = 1, rows
-         do col = 1, cols
-            living_neighbors = 0
-            start_row = max(1, row-1)
-            end_row = min(rows, row+1)
-            start_col = max(1, col-1)
-            end_col = min(cols, col+1)
-            neighbor_rows = end_row - start_row + 1
-            neighbor_cols = end_col - start_col + 1
-
-            allocate(neighbors(neighbor_rows, neighbor_cols))
-            neighbors = grid(start_row:end_row, start_col:end_col)
-
-            living_neighbors = sum(neighbors) - grid(row, col)
-            deallocate(neighbors)
-
-            if (living_neighbors == 3) then
-               alternate(row, col) = 1
-            else if (living_neighbors == 2) then
-               alternate(row, col) = grid(row, col)
-            else
-               alternate(row, col) = 0
-            end if
-         end do
-      end do
+      call calculate_next_generation()
       call usleep(speed)
-      call clear_screen()
-      print '(A,I3)', "Generation: ", generation
-      call print_grid(alternate, rows, cols)
-      grid = alternate
+      call render()
    end do
-end program game_of_life
+end program main
