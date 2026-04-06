@@ -1,5 +1,8 @@
 module grid_mod
    implicit none
+   private
+
+   public :: print_grid
 contains
    subroutine print_grid(g, row, col)
       use kinds_mod

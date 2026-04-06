@@ -1,13 +1,7 @@
-subroutine clear_screen()
-   implicit none
-   character(len=*), parameter :: clear = char(27)//"[2J"//char(27)//"[H"
-
-   print *, clear
-end subroutine clear_screen
-
 program game_of_life
    use kinds_mod
    use grid_mod
+   use terminal_mod
    implicit none
 
    interface usleep
