@@ -66,7 +66,7 @@ contains
       character(len=1) :: key
       logical :: has_key
 
-      print '(A)', 'paused. press "space" to resume.'
+      print '(A)', 'Paused. press "space" to resume.'
       do
          call read_key_nonblocking(key, has_key)
          if (has_key .and. key == ' ') then

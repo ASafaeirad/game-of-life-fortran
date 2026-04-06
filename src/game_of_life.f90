@@ -76,6 +76,7 @@ contains
 
       call clear_screen()
       print '(A,I3)', 'Generation: ', generation
+      print *, ''
       call print_grid(current_grid, size(current_grid, 1), size(current_grid, 2))
    end subroutine render
 

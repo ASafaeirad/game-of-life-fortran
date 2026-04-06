@@ -1,5 +1,7 @@
 # Game of Life in Fortran
 
+![Screenshot](./assets/screenshot.png)
+
 A small terminal implementation of Conway's Game of Life written in Fortran.
 
 ## Requirements

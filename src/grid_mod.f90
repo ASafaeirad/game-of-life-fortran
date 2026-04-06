@@ -65,5 +65,6 @@ contains
          end do
          print *, ""
       end do
+      print *, ""
    end subroutine print_grid
 end module grid_mod
