@@ -5,7 +5,7 @@ module game_of_life
 
    implicit none
    private
-   public :: initialize_game_state, calculate_next_generation, render
+   public :: initialize_game_state, calculate_next_generation, render, reset_game
 
    integer(rk), allocatable :: initial_grid(:, :)
    integer(rk), allocatable :: current_grid(:, :)
@@ -79,4 +79,14 @@ contains
       call print_grid(current_grid, size(current_grid, 1), size(current_grid, 2))
    end subroutine render
 
+   subroutine reset_game()
+      if (.not. allocated(initial_grid)) then
+         print '(A)', 'Game state has not been initialized.'
+         stop 1
+      end if
+
+      current_grid = initial_grid
+      next_grid = initial_grid
+      generation = 0
+   end subroutine reset_game
 end module
