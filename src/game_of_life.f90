@@ -1,4 +1,4 @@
-module game_of_life
+module game_of_life_mod
    use kinds_mod
    use grid_mod
    use terminal_mod
