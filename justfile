@@ -1,7 +1,7 @@
 #!/usr/bin/env just --justfile
 
 set quiet
-src    := "src/kinds_mod.f90 src/argv_mod.f90 src/grid_mod.f90 src/terminal_mod.f90 src/game_of_life.f90 src/main.f90 src/ffi.f90"
+src    := "src/kinds_mod.f90 src/argv_mod.f90 src/grid_mod.f90 src/terminal_mod.f90 src/game_of_life.f90 src/ffi.f90 src/main.f90"
 build  := "build"
 target := build + "/game_of_life"
 build:
