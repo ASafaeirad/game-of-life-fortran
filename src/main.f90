@@ -36,9 +36,10 @@ program game_of_life
       end subroutine usleep
    end interface usleep
 
-   integer(rk), parameter :: rows = 21, cols = 21
-   integer(rk) :: grid(rows, cols)
-   integer(rk) :: alternate(rows, cols)
+   integer(rk) :: rows = 1, cols = 1
+   integer(rk) :: file_grid(100, 100)
+   integer(rk), allocatable :: grid(:, :)
+   integer(rk), allocatable :: alternate(:, :)
    integer(rk), allocatable :: neighbors(:, :)
 
    integer(rk) :: living_neighbors = 0
@@ -46,9 +47,13 @@ program game_of_life
    integer(rk) :: start_row, end_row, start_col, end_col
    integer(rk) :: neighbor_rows, neighbor_cols
    integer(rk) :: generation, generations = 10
+   integer(rk) :: c
+   character(len=2) :: cell
 
    integer(rk) :: arg_size
    character(len=32) :: arg
+   integer(rk) :: unit = 10, ios
+   character(len=256) :: line
 
    arg_size = command_argument_count()
    if (arg_size >= 1) then
@@ -56,29 +61,31 @@ program game_of_life
       read(arg, *) generations
    end if
 
-   grid = transpose(reshape([&
-      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, &
-      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, &
-      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, &
-      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, &
-      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, &
-      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, &
-      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, &
-      0,0,0,0,0,0,0,0,1,0,1,0,1,0,0,0,0,0,0,0,0, &
-      0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0, &
-      0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0, &
-      0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0, &
-      0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0, &
-      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, &
-      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, &
-      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, &
-      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, &
-      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, &
-      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, &
-      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, &
-      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, &
-      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 &
-      ], [cols, rows]))
+   open(unit, file='build/input', status='old', action='read')
+   do
+      read(unit, '(A)', iostat=ios) line
+      if (ios /= 0) then
+         rows = rows - 1
+         exit
+      end if
+      cols = max(cols, len_trim(line))
+
+      do c = 1, len_trim(line)
+         cell = line(c:c)
+         if (cell == '.') then
+            file_grid(rows, c) = 0
+         else if (cell == '#') then
+            file_grid(rows, c) = 1
+         end if
+      end do
+
+      rows = rows + 1
+   end do
+   close(unit)
+
+   allocate(grid(rows, cols))
+   allocate(alternate(rows, cols))
+   grid = file_grid(1:rows, 1:cols)
    alternate = grid
 
    call clear_screen()
@@ -110,8 +117,9 @@ program game_of_life
             end if
          end do
       end do
-      call usleep(200000)
+      call usleep(100000)
       call clear_screen()
+      print '(A,I3)', "Generation: ", generation
       call print_grid(alternate, rows, cols)
       grid = alternate
    end do
