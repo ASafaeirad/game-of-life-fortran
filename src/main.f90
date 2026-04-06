@@ -1,5 +1,6 @@
 program main
    use kinds_mod
+   use grid_mod
    use game_of_life
 
    implicit none
@@ -13,20 +14,14 @@ program main
 
    integer(rk) :: rows = 1, cols = 1
    integer(rk) :: file_grid(100, 100)
-
    integer(rk) :: generation, generations = 10
-   integer(rk) :: c
-   character(len=2) :: cell
 
    integer(rk) :: arg_count, arg_index
    real :: arg_speed
    integer(rk) :: speed = 100000
    character(len=256) :: arg
    character(len=256) :: input_path = 'input'
-   integer(rk) :: unit = 10, ios
-   character(len=256) :: line
-
-   file_grid = 0
+   integer(rk) :: ios
 
    arg_count = command_argument_count()
    arg_index = 1
@@ -81,33 +76,7 @@ program main
       arg_index = arg_index + 1
    end do
 
-   open(unit, file=trim(input_path), status='old', action='read', iostat=ios)
-   if (ios /= 0) then
-      print '(2A)', 'Unable to open input file: ', trim(input_path)
-      stop 1
-   end if
-
-   do
-      read(unit, '(A)', iostat=ios) line
-      if (ios /= 0) then
-         rows = rows - 1
-         exit
-      end if
-      cols = max(cols, len_trim(line))
-
-      do c = 1, len_trim(line)
-         cell = line(c:c)
-         if (cell == '.') then
-            file_grid(rows, c) = 0
-         else if (cell == '#') then
-            file_grid(rows, c) = 1
-         end if
-      end do
-
-      rows = rows + 1
-   end do
-   close(unit)
-
+   call read_from_file(input_path, file_grid, rows, cols)
    call initialize_game_state(file_grid, rows, cols)
    call render()
    do generation = 1, generations
